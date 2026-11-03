@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codedoc-engine"
+version = "0.1.0"
+description = "Inventário local de ecossistemas de software"
+requires-python = ">=3.12"
+dependencies = ["typer>=0.12,<1", "pydantic>=2,<3", "PyYAML>=6,<7", "pathspec>=0.12,<1"]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+
+[project.scripts]
+codedoc = "codedoc.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
