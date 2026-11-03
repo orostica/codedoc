@@ -4,16 +4,79 @@ CLI local para inventariar e documentar um fluxo mínimo entre repositórios
 Next.js e C#/.NET. Comandos disponíveis: `scan`, `analyze`, `plan`, `context`
 e `validate`. A CLI não invoca agentes nem executa os projetos analisados.
 
-Requer Python 3.12+ e Git no PATH.
+## Passo a passo de uso
+
+### Executar diretamente na pasta dos projetos
+
+Após instalar a ferramenta uma vez conforme a etapa 1, abra o PowerShell na
+pasta que reúne os repositórios. O script usa o ambiente virtual da instalação
+do CodeDoc, sem precisar ativá-lo ou configurar variáveis:
+
+```powershell
+cd C:\MeuEcossistema
+& C:\SETDIG\codedoc\codedoc.cmd init
+```
+
+Substitua `C:\SETDIG\codedoc` pelo local da sua instalação. O comando `init`
+cria `ecosystem.yaml` com os repositórios Git encontrados nas subpastas
+imediatas, em ordem de nome, com IDs `repo-1`, `repo-2` etc. Pastas comuns e
+links de diretórios não são incluídos. A busca não é recursiva.
+Uma configuração existente é preservada.
+
+Revise o YAML gerado, acrescente exclusões necessárias e preencha
+`destinations` com as URLs-base e os IDs dos backends correspondentes, como
+no exemplo da etapa 2. URLs não são inferidas automaticamente. Em seguida:
+
+```powershell
+& C:\SETDIG\codedoc\codedoc.cmd scan
+& C:\SETDIG\codedoc\codedoc.cmd analyze
+& C:\SETDIG\codedoc\codedoc.cmd plan
+# Revise .codedoc\plan.json e marque reviewed como true.
+& C:\SETDIG\codedoc\codedoc.cmd context --module ID_DO_MODULO
+# Produza module.md com o pacote exportado e o agente escolhido.
+& C:\SETDIG\codedoc\codedoc.cmd validate .\module.md --context .\.codedoc\contexts\ID_DO_MODULO
+```
+
+Todos os comandos procuram `ecosystem.yaml` no diretório atual quando
+`--config` é omitido. Você ainda pode informar `--config` para usar outro
+arquivo. Caminhos dentro do YAML continuam relativos ao próprio arquivo.
+O script mantém o diretório atual da execução.
+
+Se executar `init` na raiz de um repositório Git, ele configura apenas esse
+repositório e coloca a saída em `../.codedoc-NOME-DA-PASTA/`, fora da árvore
+analisada. Faça commit do YAML gerado ou ignore-o no Git antes de analisar;
+salve também o Markdown fora do repositório para manter a árvore limpa.
+Para analisar frontend e backend juntos, prefira executar na pasta pai de ambos.
+
+O fluxo completo é: instalar → configurar → inventariar → analisar → revisar
+o plano → exportar o contexto → produzir o Markdown → validar e revisar.
+
+Execute os comandos no PowerShell, na raiz deste projeto. Substitua
+`C:\MeuEcossistema` pela pasta que contém os repositórios a documentar.
+A instalação da ferramenta fica separada dos repositórios analisados.
+
+### 1. Instalar a ferramenta
+
+Requer Python 3.12+ e Git no PATH. Confira com `python --version` e
+`git --version`. Crie o ambiente virtual e instale a CLI:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e '.[test]'
-.\.venv\Scripts\codedoc.exe scan --config C:\MeuEcossistema\ecosystem.yaml
-.\.venv\Scripts\python.exe -m pytest
+.\.venv\Scripts\codedoc.exe --help
 ```
 
-Exemplo de configuração YAML, mantida fora dos repositórios analisados:
+Os comandos usam o ambiente virtual diretamente; não é necessário ativá-lo.
+O extra `[test]` instala também as dependências de testes.
+
+### 2. Preparar os repositórios e a configuração
+
+Neste exemplo, coloque o backend em `C:\MeuEcossistema\backend` e o frontend
+em `C:\MeuEcossistema\frontend`. Confira cada repositório com
+`git -C C:\MeuEcossistema\backend status --short` e repita para o frontend.
+A saída deve estar vazia e cada repositório deve ter pelo menos um commit.
+
+Crie `C:\MeuEcossistema\ecosystem.yaml`, fora dos repositórios analisados:
 
 ```yaml
 repositories:
@@ -59,7 +122,21 @@ Exclusões por nome não reconhecem todo segredo possível: configure exclusões
 adicionais para convenções específicas do ecossistema. O inventário não contém
 trechos de código ou valores dos manifests, apenas os metadados descritos.
 
-## Fluxo mínimo de documentação
+### 3. Conferir o inventário
+
+```powershell
+.\.venv\Scripts\codedoc.exe scan --config C:\MeuEcossistema\ecosystem.yaml
+```
+
+Abra `C:\MeuEcossistema\.codedoc\inventory.json` e confira os repositórios,
+commits, arquivos, projetos e avisos antes de continuar.
+
+### 4. Analisar e gerar o plano
+
+O comando `analyze` faz uma nova varredura; executar `scan` antes é útil para
+conferência, mas não é obrigatório. Ao terminar, a CLI informa as quantidades
+de relações confirmadas, achados e lacunas. Confira esses resultados em
+`analysis.json`. Lacunas indicam partes que a ferramenta não conseguiu resolver.
 
 ```powershell
 .\.venv\Scripts\codedoc.exe analyze --config C:\MeuEcossistema\ecosystem.yaml
@@ -70,7 +147,19 @@ Os artefatos ficam ao lado do inventário configurado: `analysis.json` contém
 símbolos, dependências sintáticas, chamadas, endpoints, relações, evidências,
 comparações, achados e cobertura. `plan.json` sugere um módulo por relação confirmada. Revise os
 nomes, o escopo e as relações e altere `reviewed` de `false` para `true`.
-Copie o `id` do módulo desejado para o próximo comando:
+### 5. Revisar o plano e escolher um módulo
+
+Abra `C:\MeuEcossistema\.codedoc\plan.json` em um editor. Confira os módulos
+e as relações sugeridas com base em `analysis.json`, preservando os IDs e
+as referências aos artefatos. O campo `reviewed` pertence ao plano: marque-o
+como `true` somente depois de revisar e salve o arquivo.
+
+Copie o `id` de um módulo da lista `modules`. Se ela estiver vazia, confira
+`destinations`, as lacunas da análise e os padrões suportados descritos adiante.
+
+### 6. Exportar o contexto do módulo
+
+Substitua `ID_DO_MODULO` pelo identificador copiado do plano:
 
 ```powershell
 .\.venv\Scripts\codedoc.exe context --config C:\MeuEcossistema\ecosystem.yaml --module ID_DO_MODULO
@@ -88,12 +177,25 @@ O diretório `contexts/<id-do-modulo>/` contém:
 - `coverage.json`: relações do módulo e lacunas da análise global, que podem
   incluir outros arquivos e chamadas fora do recorte.
 
-Entregue o pacote ao agente de sua preferência e peça Markdown conforme a
-tarefa. Use citações `[@ev-<24 caracteres hexadecimais>]`, copiando os IDs
+### 7. Produzir o documento com um agente
+
+Entregue o diretório completo do pacote ao agente de sua preferência, incluindo
+`sources/`. A redação acontece nessa etapa, fora da CLI. Exemplo de solicitação:
+
+```text
+Leia task.md e os arquivos deste pacote. Produza module.md com as seções
+exigidas, usando as evidências de context.json. Registre os achados e
+as lacunas e use os IDs exatos nas citações.
+```
+
+Salve o documento em `C:\MeuEcossistema\module.md`, fora dos repositórios
+analisados. Use citações `[@ev-<24 caracteres hexadecimais>]`, copiando os IDs
 exatos de `context.json`. Cada evidência identifica repositório, commit,
 arquivo relativo, símbolo, linhas inclusivas e SHA-256 do arquivo inteiro.
 O pacote também registra SHA-256 dos trechos exportados. Os hashes são
 verificados contra os blobs Git, independentemente de CRLF da cópia local.
+
+### 8. Validar e revisar o documento
 
 ```powershell
 .\.venv\Scripts\codedoc.exe validate C:\MeuEcossistema\module.md --config C:\MeuEcossistema\ecosystem.yaml --context C:\MeuEcossistema\.codedoc\contexts\ID_DO_MODULO
@@ -110,6 +212,33 @@ das fontes originais e refaz a comparação determinística para detectar
 adulterações no corpo, na exigência ou na explicação registrada.
 As três dimensões de validação e a comparação com fontes atuais serão
 ampliadas no ticket 12.
+
+Quando a validação passa, a CLI informa: `Estrutura e evidências válidas.
+Conteúdo aguarda revisão humana.` Se falhar, corrija os problemas listados e
+execute o comando novamente. Revise se as afirmações são sustentadas pelas
+evidências e se as lacunas estão claras.
+
+### 9. Atualizar após mudanças nos repositórios
+
+Faça os commits das mudanças e deixe as árvores limpas. Preserve os artefatos
+anteriores em outra pasta, execute `analyze`, gere e revise um novo plano e
+exporte o contexto atualizado. Produza e valide o documento com esse pacote.
+
+### Problemas comuns
+
+| Situação | Como prosseguir |
+| --- | --- |
+| Repositório sem commit ou com alterações | Confira `git status --short`, revise e faça commit ou use uma cópia limpa. |
+| Nenhum módulo sugerido | Confira destinos, métodos, rotas e lacunas em `analysis.json`. |
+| Plano não revisado ou incompatível | Use o plano da análise atual e marque `reviewed` como `true` após revisá-lo. |
+| Plano ou pacote já existente | Mova o artefato anterior para preservá-lo antes de gerar outro. |
+| Documento rejeitado | Confira seções, commits, IDs de achados e citações contra o pacote usado. |
+
+Para consultar opções de um comando, execute, por exemplo:
+
+```powershell
+.\.venv\Scripts\codedoc.exe context --help
+```
 
 ## Padrões cobertos nesta entrega
 
