@@ -1,4 +1,4 @@
-"""Contratos executáveis dos artefatos locais, versão 1.0."""
+"""Contratos executáveis: análise/contexto 1.1, plano/cobertura 1.0."""
 
 from pathlib import PurePosixPath
 from typing import Literal
@@ -57,6 +57,31 @@ class Dependency(Model):
     evidence_id: str
 
 
+class RequestBody(Model):
+    status: Literal["object", "unknown", "none"]
+    fields: list[str] = Field(default_factory=list)
+    reason: str | None = None
+
+    @model_validator(mode="after")
+    def shape(self):
+        if len(set(self.fields)) != len(self.fields) or (self.status != "object" and self.fields):
+            raise ValueError("Formato JSON inconsistente")
+        return self
+
+
+class BodyRequirement(Model):
+    status: Literal["known", "unknown", "none"]
+    fields: list[str] = Field(default_factory=list)
+    reason: str | None = None
+
+    @model_validator(mode="after")
+    def shape(self):
+        if (len(set(self.fields)) != len(self.fields)
+                or (self.status == "known") != bool(self.fields)):
+            raise ValueError("Obrigatoriedade inconsistente")
+        return self
+
+
 class Endpoint(Model):
     id: str
     symbol_id: str
@@ -64,6 +89,7 @@ class Endpoint(Model):
     method: str
     route: str
     evidence_ids: list[str]
+    request: BodyRequirement
 
 
 class Call(Model):
@@ -73,6 +99,7 @@ class Call(Model):
     method: str | None
     url: str | None
     evidence_id: str
+    body: RequestBody
 
 
 class Relation(Model):
@@ -90,6 +117,22 @@ class Gap(Model):
     call_id: str | None = None
 
 
+class Finding(Model):
+    id: str = Field(pattern=r"^finding-[a-f0-9]{24}$")
+    code: Literal["missing_required_field"] = "missing_required_field"
+    relation_id: str
+    field: str
+    explanation: str
+    evidence_ids: list[str] = Field(min_length=2)
+
+
+class Comparison(Model):
+    relation_id: str
+    status: Literal["missing", "no_omission", "unknown", "not_applicable"]
+    reason: str
+    finding_ids: list[str] = Field(default_factory=list)
+
+
 class Coverage(Model):
     schema_version: Literal["1.0"] = "1.0"
     confirmed: list[str]
@@ -99,7 +142,7 @@ class Coverage(Model):
 
 
 class Analysis(Model):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.1"] = "1.1"
     analysis_id: str
     config_hash: str
     repositories: list[RepositoryRevision]
@@ -109,11 +152,13 @@ class Analysis(Model):
     endpoints: list[Endpoint]
     calls: list[Call]
     relations: list[Relation]
+    findings: list[Finding]
+    comparisons: list[Comparison]
     coverage: Coverage
 
     @model_validator(mode="after")
     def references(self):
-        groups = (self.repositories, self.symbols, self.evidence, self.calls, self.endpoints, self.relations)
+        groups = (self.repositories, self.symbols, self.evidence, self.calls, self.endpoints, self.relations, self.findings)
         for group in groups:
             if len({item.id for item in group}) != len(group):
                 raise ValueError("Identificador duplicado")
@@ -122,6 +167,7 @@ class Analysis(Model):
         evidence = {item.id: item for item in self.evidence}
         calls = {item.id: item for item in self.calls}
         endpoints = {item.id: item for item in self.endpoints}
+        relations = {item.id: item for item in self.relations}
         for item in self.evidence:
             if item.symbol not in symbols or repos.get(item.repository_id) != item.revision:
                 raise ValueError("Evidência sem origem")
@@ -144,6 +190,36 @@ class Analysis(Model):
         for item in self.relations:
             if item.call_id not in calls or item.endpoint_id not in endpoints:
                 raise ValueError("Relação sem origem")
+        for item in self.findings:
+            rel = relations.get(item.relation_id)
+            if rel is None or rel.status != "confirmed":
+                raise ValueError("Achado exige relação confirmada")
+            call, endpoint = calls[rel.call_id], endpoints[rel.endpoint_id]
+            if (call.body.status != "object" or endpoint.request.status != "known"
+                    or item.field not in endpoint.request.fields or item.field in call.body.fields
+                    or set(item.evidence_ids) != {call.evidence_id, symbols[endpoint.symbol_id].evidence_id}):
+                raise ValueError("Achado sem provas correspondentes")
+        if {item.relation_id for item in self.comparisons} != set(relations) or len(self.comparisons) != len(relations):
+            raise ValueError("Comparações incompletas ou duplicadas")
+        for item in self.comparisons:
+            linked = [finding for finding in self.findings if finding.relation_id == item.relation_id]
+            if set(item.finding_ids) != {finding.id for finding in linked} or len(set(item.finding_ids)) != len(item.finding_ids):
+                raise ValueError("Comparação referencia achados inconsistentes")
+            rel = relations[item.relation_id]
+            call, endpoint = calls[rel.call_id], endpoints[rel.endpoint_id]
+            missing = set(endpoint.request.fields) - set(call.body.fields)
+            serialization_unknown = any(
+                (gap.repository_id == endpoint.repository_id and gap.code == "dotnet_serialization_unresolved")
+                or (gap.repository_id == call.repository_id and gap.code == "javascript_serialization_unresolved"
+                    and call.body.reason == "inline_json_stringify_object") for gap in self.coverage.gaps
+            )
+            expected = ("unknown" if rel.status != "confirmed" else
+                        "not_applicable" if endpoint.request.status == "none" else
+                        "unknown" if serialization_unknown else
+                        "unknown" if endpoint.request.status != "known" or call.body.status != "object" else
+                        "missing" if missing else "no_omission")
+            if item.status != expected or {finding.field for finding in linked} != (missing if expected == "missing" else set()):
+                raise ValueError("Resultado de comparação inconsistente")
         confirmed = [item.id for item in self.relations if item.status == "confirmed"]
         candidates = [item.id for item in self.relations if item.status == "candidate"]
         unresolved = [item.id for item in self.calls if not any(rel.call_id == item.id and rel.status == "confirmed" for rel in self.relations)]
@@ -173,7 +249,7 @@ class Source(Model):
 
 
 class Context(Model):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.1"] = "1.1"
     module: Module
     analysis: Analysis
     sources: list[Source]

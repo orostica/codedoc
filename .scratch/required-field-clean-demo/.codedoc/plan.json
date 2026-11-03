@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "analysis_id": "82f6f5464a190b3ab398ce8703125621b5d57d7529fcd49e472451313006961c",
+  "reviewed": false,
+  "modules": [
+    {
+      "id": "post-api-people-14c84fc4",
+      "title": "POST /api/people",
+      "relation_ids": [
+        "rel-c082e712ba97ade914c84fc4"
+      ]
+    }
+  ]
+}

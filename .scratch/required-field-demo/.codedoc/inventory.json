@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "repositories": [
+    {
+      "id": "api",
+      "revision": "1894793a7d3cda4100864071e465451a0ea39ebb",
+      "files": [
+        "Demo.csproj",
+        "PeopleController.cs"
+      ],
+      "languages": [
+        "csharp"
+      ],
+      "projects": [
+        {
+          "manifest": "Demo.csproj",
+          "technologies": [
+            "csharp",
+            "dotnet"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "portal",
+      "revision": "fe11853936321586c880c2e94422151a6254d8c1",
+      "files": [
+        "client.ts",
+        "package.json"
+      ],
+      "languages": [
+        "typescript"
+      ],
+      "projects": [
+        {
+          "manifest": "package.json",
+          "technologies": [
+            "next",
+            "nodejs"
+          ]
+        }
+      ]
+    }
+  ],
+  "destinations": [
+    {
+      "url": "https://api.example.invalid",
+      "repository_id": "api"
+    }
+  ]
+}

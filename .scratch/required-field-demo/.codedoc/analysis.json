@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.1",
+  "analysis_id": "10839ccebd4ae339801162535676a6edcd0a853b26b096ac2582d8ad3a3f6238",
+  "config_hash": "38fe0c4faeb91532c7a37954f79cc19bb968efa36384bba162609d047399b75e",
+  "repositories": [
+    {
+      "id": "api",
+      "revision": "1894793a7d3cda4100864071e465451a0ea39ebb"
+    },
+    {
+      "id": "portal",
+      "revision": "fe11853936321586c880c2e94422151a6254d8c1"
+    }
+  ],
+  "symbols": [
+    {
+      "repository_id": "api",
+      "file": "PeopleController.cs",
+      "start_line": 1,
+      "end_line": 19,
+      "id": "api:PeopleController.cs:module:PeopleController.cs:1:0",
+      "name": "PeopleController.cs",
+      "kind": "module",
+      "evidence_id": "ev-334403bed4389441a9210708"
+    },
+    {
+      "repository_id": "api",
+      "file": "PeopleController.cs",
+      "start_line": 6,
+      "end_line": 19,
+      "id": "api:PeopleController.cs:class:PeopleController:6:0",
+      "name": "PeopleController",
+      "kind": "class",
+      "evidence_id": "ev-09d635558d5c1df9209df6e2"
+    },
+    {
+      "repository_id": "api",
+      "file": "PeopleController.cs",
+      "start_line": 10,
+      "end_line": 18,
+      "id": "api:PeopleController.cs:method:PeopleController.Create:10:4",
+      "name": "PeopleController.Create",
+      "kind": "method",
+      "evidence_id": "ev-ee3a3390a05005dcbacb3e49"
+    },
+    {
+      "repository_id": "portal",
+      "file": "client.ts",
+      "start_line": 1,
+      "end_line": 9,
+      "id": "portal:client.ts:module:client.ts:1:0",
+      "name": "client.ts",
+      "kind": "module",
+      "evidence_id": "ev-9356412691e940b5855c7302"
+    },
+    {
+      "repository_id": "portal",
+      "file": "client.ts",
+      "start_line": 3,
+      "end_line": 9,
+      "id": "portal:client.ts:function:createPerson:3:7",
+      "name": "createPerson",
+      "kind": "function",
+      "evidence_id": "ev-53185a2490af84cd2ef6f110"
+    }
+  ],
+  "evidence": [
+    {
+      "repository_id": "api",
+      "file": "PeopleController.cs",
+      "start_line": 1,
+      "end_line": 19,
+      "id": "ev-334403bed4389441a9210708",
+      "revision": "1894793a7d3cda4100864071e465451a0ea39ebb",
+      "source_hash": "621c1455b635d0d9a631be11dc7ab6115f584f924389c199b8ee025cb02504d2",
+      "symbol": "api:PeopleController.cs:module:PeopleController.cs:1:0"
+    },
+    {
+      "repository_id": "api",
+      "file": "PeopleController.cs",
+      "start_line": 6,
+      "end_line": 19,
+      "id": "ev-09d635558d5c1df9209df6e2",
+      "revision": "1894793a7d3cda4100864071e465451a0ea39ebb",
+      "source_hash": "621c1455b635d0d9a631be11dc7ab6115f584f924389c199b8ee025cb02504d2",
+      "symbol": "api:PeopleController.cs:class:PeopleController:6:0"
+    },
+    {
+      "repository_id": "api",
+      "file": "PeopleController.cs",
+      "start_line": 10,
+      "end_line": 18,
+      "id": "ev-ee3a3390a05005dcbacb3e49",
+      "revision": "1894793a7d3cda4100864071e465451a0ea39ebb",
+      "source_hash": "621c1455b635d0d9a631be11dc7ab6115f584f924389c199b8ee025cb02504d2",
+      "symbol": "api:PeopleController.cs:method:PeopleController.Create:10:4"
+    },
+    {
+      "repository_id": "portal",
+      "file": "client.ts",
+      "start_line": 1,
+      "end_line": 9,
+      "id": "ev-9356412691e940b5855c7302",
+      "revision": "fe11853936321586c880c2e94422151a6254d8c1",
+      "source_hash": "9d857211cfe34841f18b5d3090e3fe12d97f6b1d9e976f666521e35534ca348e",
+      "symbol": "portal:client.ts:module:client.ts:1:0"
+    },
+    {
+      "repository_id": "portal",
+      "file": "client.ts",
+      "start_line": 3,
+      "end_line": 9,
+      "id": "ev-53185a2490af84cd2ef6f110",
+      "revision": "fe11853936321586c880c2e94422151a6254d8c1",
+      "source_hash": "9d857211cfe34841f18b5d3090e3fe12d97f6b1d9e976f666521e35534ca348e",
+      "symbol": "portal:client.ts:function:createPerson:3:7"
+    }
+  ],
+  "dependencies": [
+    {
+      "from_symbol": "api:PeopleController.cs:module:PeopleController.cs:1:0",
+      "target": "using Microsoft.AspNetCore.Mvc;",
+      "kind": "using",
+      "evidence_id": "ev-334403bed4389441a9210708"
+    },
+    {
+      "from_symbol": "api:PeopleController.cs:module:PeopleController.cs:1:0",
+      "target": "using System.Text.Json;",
+      "kind": "using",
+      "evidence_id": "ev-334403bed4389441a9210708"
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "endpoint-0ef58d7b0348b780ab44ac51",
+      "symbol_id": "api:PeopleController.cs:method:PeopleController.Create:10:4",
+      "repository_id": "api",
+      "method": "POST",
+      "route": "/api/people",
+      "evidence_ids": [
+        "ev-09d635558d5c1df9209df6e2",
+        "ev-ee3a3390a05005dcbacb3e49"
+      ],
+      "request": {
+        "status": "known",
+        "fields": [
+          "name"
+        ],
+        "reason": "explicit_presence_guards"
+      }
+    }
+  ],
+  "calls": [
+    {
+      "id": "call-38708f2fd288d18c6687a8bc",
+      "symbol_id": "portal:client.ts:function:createPerson:3:7",
+      "repository_id": "portal",
+      "method": "POST",
+      "url": "https://api.example.invalid/api/people",
+      "evidence_id": "ev-53185a2490af84cd2ef6f110",
+      "body": {
+        "status": "object",
+        "fields": [
+          "age"
+        ],
+        "reason": "inline_json_stringify_object"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "id": "rel-c082e712ba97ade914c84fc4",
+      "call_id": "call-38708f2fd288d18c6687a8bc",
+      "endpoint_id": "endpoint-0ef58d7b0348b780ab44ac51",
+      "status": "confirmed",
+      "reason": "destination_method_route"
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding-43371dcd133a721b3a06b921",
+      "code": "missing_required_field",
+      "relation_id": "rel-c082e712ba97ade914c84fc4",
+      "field": "name",
+      "explanation": "O corpo JSON enviado omite a chave 'name'; a guarda inicial do backend retorna BadRequest quando essa chave est\u00e1 ausente.",
+      "evidence_ids": [
+        "ev-53185a2490af84cd2ef6f110",
+        "ev-ee3a3390a05005dcbacb3e49"
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "relation_id": "rel-c082e712ba97ade914c84fc4",
+      "status": "missing",
+      "reason": "proven_required_keys_omitted",
+      "finding_ids": [
+        "finding-43371dcd133a721b3a06b921"
+      ]
+    }
+  ],
+  "coverage": {
+    "schema_version": "1.0",
+    "confirmed": [
+      "rel-c082e712ba97ade914c84fc4"
+    ],
+    "candidates": [],
+    "unresolved_calls": [],
+    "gaps": []
+  }
+}

@@ -1,19 +1,25 @@
 """Criar dois repositórios de demonstração sem executar frontend ou backend."""
 
 import argparse
+import json
 from pathlib import Path
 import shutil
 import subprocess
 
 
-def prepare(destination: Path):
+def prepare(destination: Path, fixture_name: str = "minimal"):
     if destination.exists():
         raise SystemExit("O destino já existe. Escolha um diretório novo.")
-    fixture = Path(__file__).resolve().parents[2] / "tests/fixtures/minimal"
+    fixture = Path(__file__).resolve().parents[2] / "tests/fixtures" / fixture_name
+    manifest = json.loads((fixture / "files.json").read_text(encoding="utf-8"))
     destination.mkdir(parents=True)
     for name in ("api", "portal"):
         root = destination / name
-        shutil.copytree(fixture / name, root)
+        root.mkdir()
+        for relative in manifest[name]:
+            target = root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(fixture / name / relative, target)
         commands = [
             ["init"], ["config", "user.name", "CodeDoc Demo"],
             ["config", "user.email", "codedoc@example.invalid"],
@@ -35,4 +41,6 @@ def prepare(destination: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("destination", type=Path)
-    prepare(parser.parse_args().destination.resolve())
+    parser.add_argument("--fixture", choices=("minimal", "required-field"), default="minimal")
+    arguments = parser.parse_args()
+    prepare(arguments.destination.resolve(), arguments.fixture)

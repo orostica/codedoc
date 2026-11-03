@@ -36,7 +36,7 @@ def analyze_command(config: Path = typer.Option(..., "--config")):
     except ScanError as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from None
-    typer.echo(f"Análise gravada: {len(result.coverage.confirmed)} relação(ões) confirmada(s), {len(result.coverage.gaps)} lacuna(s).")
+    typer.echo(f"Análise gravada: {len(result.coverage.confirmed)} relação(ões) confirmada(s), {len(result.findings)} achado(s), {len(result.coverage.gaps)} lacuna(s).")
 
 
 @app.command("plan")

@@ -1,7 +1,6 @@
 """Extração sintática conservadora; padrões não resolvidos viram lacunas."""
 
 from hashlib import sha256
-import json
 import re
 from urllib.parse import urlsplit
 
@@ -10,57 +9,8 @@ import tree_sitter_c_sharp
 import tree_sitter_typescript
 
 from codedoc.models import Call, Dependency, Endpoint, Evidence, Gap, Symbol
-
-
-def stable_id(prefix: str, *parts: str) -> str:
-    return prefix + sha256("\0".join(parts).encode()).hexdigest()[:24]
-
-
-def walk(node):
-    yield node
-    for child in node.named_children:
-        yield from walk(child)
-
-
-def text(node) -> str:
-    return node.text.decode("utf-8") if node is not None else ""
-
-
-def literal(node) -> str | None:
-    value = text(node)
-    if node is None or node.type not in {"string", "string_literal"}:
-        return None
-    try:
-        if value.startswith('"'):
-            decoded = json.loads(value)
-            return decoded if isinstance(decoded, str) else None
-        if value.startswith("'") and value.endswith("'") and "\\" not in value:
-            return value[1:-1]
-    except ValueError:
-        pass
-    return None
-
-
-def property_name(node) -> str | None:
-    if node.type == "property_identifier":
-        return text(node)
-    return literal(node)
-
-
-def attributes(node):
-    result = []
-    for child in node.named_children:
-        if child.type != "attribute_list":
-            continue
-        for attr in child.named_children:
-            name = text(attr.child_by_field_name("name"))
-            arguments = next((item for item in attr.named_children if item.type == "attribute_argument_list"), None)
-            values = [] if arguments is None else [
-                literal(item.named_children[0]) if len(item.named_children) == 1 else None
-                for item in arguments.named_children
-            ]
-            result.append((name, values))
-    return result
+from codedoc.contracts import body_requirement, request_body, serialization_risk
+from codedoc.syntax import attributes, literal, property_name, stable_id, text, walk
 
 
 class Extractor:
@@ -100,6 +50,8 @@ class Extractor:
             self.gap("syntax_error")
             return self
         module = self.symbol(root, "module", self.file)
+        if serialization_risk(root, self.file.lower().endswith(".cs")):
+            self.gap("dotnet_serialization_unresolved" if self.file.lower().endswith(".cs") else "javascript_serialization_unresolved")
         if self.file.lower().endswith(".cs"):
             self.csharp(root, module)
         else:
@@ -167,7 +119,8 @@ class Extractor:
                 except ValueError:
                     url = None
             call = Call(id=stable_id("call-", symbol.id, str(node.start_byte)), symbol_id=symbol.id,
-                        repository_id=self.repository_id, method=method, url=url, evidence_id=symbol.evidence_id)
+                        repository_id=self.repository_id, method=method, url=url, evidence_id=symbol.evidence_id,
+                        body=request_body(node, root))
             self.calls.append(call)
             if url is None or method is None:
                 self.gap("fetch_unresolved", call.id)
@@ -226,6 +179,7 @@ class Extractor:
                     continue
                 self.endpoints.append(Endpoint(id=stable_id("endpoint-", symbol.id, verb, route), symbol_id=symbol.id,
                                                repository_id=self.repository_id, method=verb, route=route,
-                                               evidence_ids=[class_symbol.evidence_id, symbol.evidence_id]))
+                                               evidence_ids=[class_symbol.evidence_id, symbol.evidence_id],
+                                               request=body_requirement(method, node, root)))
         if any(node.type == "invocation_expression" and re.search(r"\.Map(Get|Post|Put|Delete|Patch)$", text(node.child_by_field_name("function"))) for node in walk(root)):
             self.gap("minimal_api_not_supported")

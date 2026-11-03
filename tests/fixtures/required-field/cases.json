@@ -1,0 +1,21 @@
+[
+  {"id":"optional_frontend_omitted", "body":"JSON.stringify({ age: 18 })", "backend":"required", "expected":"missing", "fields":["name"]},
+  {"id":"required_field_sent", "body":"JSON.stringify({ name: 'Ana', age: 18 })", "backend":"required", "expected":"no_omission", "fields":[]},
+  {"id":"empty_object", "body":"JSON.stringify({})", "backend":"required", "expected":"missing", "fields":["name"]},
+  {"id":"literal_json_omitted", "body":"'{\"age\":18}'", "backend":"required", "expected":"missing", "fields":["name"]},
+  {"id":"literal_json_sent", "body":"'{\"name\":\"Ana\"}'", "backend":"required", "expected":"no_omission", "fields":[]},
+  {"id":"null_is_present_not_type_checked", "body":"JSON.stringify({ name: null })", "backend":"required", "expected":"no_omission", "fields":[]},
+  {"id":"dynamic_payload", "body":"JSON.stringify(input)", "backend":"required", "expected":"unknown", "fields":[]},
+  {"id":"optional_value", "body":"JSON.stringify({ name: input.name })", "backend":"required", "expected":"unknown", "fields":[]},
+  {"id":"spread_payload", "body":"JSON.stringify({ ...input })", "backend":"required", "expected":"unknown", "fields":[]},
+  {"id":"computed_key", "body":"JSON.stringify({ [key]: 'Ana' })", "backend":"required", "expected":"unknown", "fields":[]},
+  {"id":"replacer", "body":"JSON.stringify({ name: 'Ana' }, [])", "backend":"required", "expected":"unknown", "fields":[]},
+  {"id":"undefined_value", "body":"JSON.stringify({ name: undefined })", "backend":"required", "expected":"unknown", "fields":[]},
+  {"id":"non_object", "body":"JSON.stringify(null)", "backend":"required", "expected":"unknown", "fields":[]},
+  {"id":"conditional_guard", "body":"JSON.stringify({ age: 18 })", "backend":"conditional", "expected":"unknown", "fields":[]},
+  {"id":"non_rejecting_guard", "body":"JSON.stringify({ age: 18 })", "backend":"not_rejecting", "expected":"unknown", "fields":[]},
+  {"id":"conditional_early_success", "body":"JSON.stringify({ age: 18 })", "backend":"early_success", "expected":"unknown", "fields":[]},
+  {"id":"attribute_only_dto", "body":"JSON.stringify({ age: 18 })", "backend":"dto", "expected":"unknown", "fields":[]},
+  {"id":"two_required_fields", "body":"JSON.stringify({ age: 18 })", "backend":"two_required", "expected":"missing", "fields":["name","email"]},
+  {"id":"case_sensitive_json_key", "body":"JSON.stringify({ Name: 'Ana' })", "backend":"required", "expected":"missing", "fields":["name"]}
+]

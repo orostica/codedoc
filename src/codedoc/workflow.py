@@ -11,6 +11,7 @@ from urllib.parse import urlsplit
 from pydantic import ValidationError
 
 from codedoc.config import Configuration, ScanError
+from codedoc.comparison import compare_required_fields
 from codedoc.models import Analysis, Context, Coverage, Gap, Module, Plan, Relation, Source
 from codedoc.parsing import Extractor, stable_id
 from codedoc.scanner import git, revision, scan, write_inventory
@@ -129,10 +130,13 @@ def analyze(config: Configuration) -> Analysis:
             gaps.append(Gap(repository_id=call.repository_id,
                             file=next(item.file for item in symbols if item.id == call.symbol_id),
                             code="destination_unmapped" if not destinations else "endpoint_unresolved_or_ambiguous", call_id=call.id))
+    comparisons, findings, comparison_gaps = compare_required_fields(calls, endpoints, relations, symbols, gaps)
+    gaps.extend(comparison_gaps)
     analysis = Analysis(analysis_id="pending", config_hash=config_hash(config),
                         repositories=[{"id": repo["id"], "revision": repo["revision"]} for repo in inventory["repositories"]],
                         symbols=symbols, evidence=evidence, dependencies=dependencies,
                         calls=calls, endpoints=endpoints, relations=relations,
+                        comparisons=comparisons, findings=findings,
                         coverage=coverage(calls, relations, gaps))
     analysis.analysis_id = analysis_hash(analysis)
     check_revisions(config, analysis)
@@ -186,10 +190,13 @@ def select_analysis(analysis: Analysis, module: Module) -> Analysis:
     evidence_ids.update(item.evidence_id for item in symbols)
     evidence = [item for item in analysis.evidence if item.id in evidence_ids]
     dependencies = [item for item in analysis.dependencies if item.from_symbol in symbol_ids]
+    relation_ids = {item.id for item in relations}
     # Cobertura global de lacunas acompanha o módulo para evitar sugerir completude.
     return Analysis(analysis_id=analysis.analysis_id, config_hash=analysis.config_hash,
                     repositories=analysis.repositories, symbols=symbols, evidence=evidence,
                     dependencies=dependencies, calls=calls, endpoints=endpoints, relations=relations,
+                    comparisons=[item for item in analysis.comparisons if item.relation_id in relation_ids],
+                    findings=[item for item in analysis.findings if item.relation_id in relation_ids],
                     coverage=coverage(calls, relations, analysis.coverage.gaps))
 
 
@@ -205,7 +212,10 @@ Cada afirmação sobre comportamento ou contrato deve citar [@ev-IDENTIFICADOR],
 substituindo pelo ID exato da evidência. Cada parágrafo de Objetivo e Fluxo
 deve conter uma citação. Diferencie fatos de inferências e preserve lacunas.
 Imports são dependências sintáticas, sem garantia de resolução semântica.
-Não conclua divergências de contrato: este recorte apenas relaciona chamadas e endpoints.
+Descreva apenas divergências registradas em analysis.findings, preservando seus IDs,
+explicações e citações de ambos os lados. O recorte compara presença de chaves JSON,
+sem validar tipos ou valores; no_omission não comprova compatibilidade completa.
+Comparações unknown e relações candidatas são lacunas, sem divergência afirmada.
 Restrição de interface não comprova regra aplicada no servidor.
 Registre revisão humana pendente; referências válidas não aprovam o conteúdo.
 Preserve o código-fonte. A validação será executada separadamente.

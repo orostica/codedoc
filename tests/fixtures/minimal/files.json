@@ -1,0 +1,4 @@
+{
+  "api": [".gitignore", "Demo.csproj", "ItemsController.cs"],
+  "portal": [".gitignore", "package.json", "client.ts", "types.ts"]
+}

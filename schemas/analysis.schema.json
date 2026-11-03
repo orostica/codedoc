@@ -1,5 +1,43 @@
 {
   "$defs": {
+    "BodyRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "known",
+            "unknown",
+            "none"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "BodyRequirement",
+      "type": "object"
+    },
     "Call": {
       "additionalProperties": false,
       "properties": {
@@ -40,6 +78,9 @@
         "evidence_id": {
           "title": "Evidence Id",
           "type": "string"
+        },
+        "body": {
+          "$ref": "#/$defs/RequestBody"
         }
       },
       "required": [
@@ -48,9 +89,47 @@
         "repository_id",
         "method",
         "url",
-        "evidence_id"
+        "evidence_id",
+        "body"
       ],
       "title": "Call",
+      "type": "object"
+    },
+    "Comparison": {
+      "additionalProperties": false,
+      "properties": {
+        "relation_id": {
+          "title": "Relation Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "missing",
+            "no_omission",
+            "unknown",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "finding_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Finding Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "relation_id",
+        "status",
+        "reason"
+      ],
+      "title": "Comparison",
       "type": "object"
     },
     "Coverage": {
@@ -162,6 +241,9 @@
           },
           "title": "Evidence Ids",
           "type": "array"
+        },
+        "request": {
+          "$ref": "#/$defs/BodyRequirement"
         }
       },
       "required": [
@@ -170,7 +252,8 @@
         "repository_id",
         "method",
         "route",
-        "evidence_ids"
+        "evidence_ids",
+        "request"
       ],
       "title": "Endpoint",
       "type": "object"
@@ -227,6 +310,51 @@
         "symbol"
       ],
       "title": "Evidence",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^finding-[a-f0-9]{24}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "code": {
+          "const": "missing_required_field",
+          "default": "missing_required_field",
+          "title": "Code",
+          "type": "string"
+        },
+        "relation_id": {
+          "title": "Relation Id",
+          "type": "string"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "relation_id",
+        "field",
+        "explanation",
+        "evidence_ids"
+      ],
+      "title": "Finding",
       "type": "object"
     },
     "Gap": {
@@ -323,6 +451,44 @@
       "title": "RepositoryRevision",
       "type": "object"
     },
+    "RequestBody": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "object",
+            "unknown",
+            "none"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "RequestBody",
+      "type": "object"
+    },
     "Symbol": {
       "additionalProperties": false,
       "properties": {
@@ -384,8 +550,8 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Schema Version",
       "type": "string"
     },
@@ -446,6 +612,20 @@
       "title": "Relations",
       "type": "array"
     },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "comparisons": {
+      "items": {
+        "$ref": "#/$defs/Comparison"
+      },
+      "title": "Comparisons",
+      "type": "array"
+    },
     "coverage": {
       "$ref": "#/$defs/Coverage"
     }
@@ -460,6 +640,8 @@
     "endpoints",
     "calls",
     "relations",
+    "findings",
+    "comparisons",
     "coverage"
   ],
   "title": "Analysis",

@@ -1,0 +1,5 @@
+{
+  "name": "codedoc-required-field-fixture",
+  "private": true,
+  "dependencies": { "next": "15.0.0" }
+}

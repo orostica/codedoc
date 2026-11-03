@@ -16,16 +16,28 @@ from test_scan import configuration, git, repository
 FIXTURE = Path(__file__).parent / "fixtures/minimal"
 
 
+def fixture_sources(fixture, name):
+    manifest = json.loads((fixture / "files.json").read_text(encoding="utf-8"))
+    return {relative: (fixture / name / relative).read_text(encoding="utf-8") for relative in manifest[name]}
+
+
 @pytest.fixture
 def ecosystem(tmp_path):
     roots = []
     for name in ("api", "portal"):
-        files = {path.relative_to(FIXTURE / name).as_posix(): path.read_text(encoding="utf-8")
-                 for path in (FIXTURE / name).rglob("*") if path.is_file()}
+        files = fixture_sources(FIXTURE, name)
         roots.append(repository(tmp_path / name, files))
     path = configuration(tmp_path, roots,
                          destinations=[{"url": "https://api.example.invalid", "repository_id": "api"}])
     return path, load_config(path), roots
+
+
+def test_fixture_loader_ignores_generated_binaries(tmp_path):
+    (tmp_path / "api/obj").mkdir(parents=True)
+    (tmp_path / "api/ItemsController.cs").write_text("class ItemsController {}", encoding="utf-8")
+    (tmp_path / "api/obj/Demo.assets.cache").write_bytes(b"\xff\x00generated")
+    (tmp_path / "files.json").write_text(json.dumps({"api": ["ItemsController.cs"]}), encoding="utf-8")
+    assert fixture_sources(tmp_path, "api") == {"ItemsController.cs": "class ItemsController {}"}
 
 
 def reviewed_package(config):
