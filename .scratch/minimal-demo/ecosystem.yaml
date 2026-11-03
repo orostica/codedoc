@@ -1,0 +1,9 @@
+repositories:
+  - id: api
+    path: ./api
+  - id: portal
+    path: ./portal
+destinations:
+  - url: https://api.example.invalid
+    repository_id: api
+output: ./.codedoc/inventory.json

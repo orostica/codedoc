@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "analysis_id": "192a45029b0d0d3029d302e3f2bb7c1db5e57931401a80124a83627f89c5047d",
+  "config_hash": "0e605102154c020f67828ab9ce08e514ae97b74bb5f45ea112b4d41c1b9f50a3",
+  "repositories": [
+    {
+      "id": "api",
+      "revision": "9327291eb6bb8783c1101a64ea11a2137fad377f"
+    },
+    {
+      "id": "portal",
+      "revision": "e493ad4abbd553c659e9e7c93b9a8e810a6d2da3"
+    }
+  ],
+  "symbols": [
+    {
+      "repository_id": "api",
+      "file": "ItemsController.cs",
+      "start_line": 1,
+      "end_line": 14,
+      "id": "api:ItemsController.cs:module:ItemsController.cs:1:0",
+      "name": "ItemsController.cs",
+      "kind": "module",
+      "evidence_id": "ev-f3f615e20231e7ead5f3d577"
+    },
+    {
+      "repository_id": "api",
+      "file": "ItemsController.cs",
+      "start_line": 5,
+      "end_line": 14,
+      "id": "api:ItemsController.cs:class:ItemsController:5:0",
+      "name": "ItemsController",
+      "kind": "class",
+      "evidence_id": "ev-f524bc169639fa5fdcee6b96"
+    },
+    {
+      "repository_id": "api",
+      "file": "ItemsController.cs",
+      "start_line": 9,
+      "end_line": 13,
+      "id": "api:ItemsController.cs:method:ItemsController.List:9:4",
+      "name": "ItemsController.List",
+      "kind": "method",
+      "evidence_id": "ev-a2e77a5e8646f8d1a6d8184f"
+    },
+    {
+      "repository_id": "portal",
+      "file": "client.ts",
+      "start_line": 1,
+      "end_line": 8,
+      "id": "portal:client.ts:module:client.ts:1:0",
+      "name": "client.ts",
+      "kind": "module",
+      "evidence_id": "ev-fe652ccaea4af435d2c74e92"
+    },
+    {
+      "repository_id": "portal",
+      "file": "client.ts",
+      "start_line": 3,
+      "end_line": 8,
+      "id": "portal:client.ts:function:loadItems:3:7",
+      "name": "loadItems",
+      "kind": "function",
+      "evidence_id": "ev-056d903b636e23d3b418d7fa"
+    },
+    {
+      "repository_id": "portal",
+      "file": "types.ts",
+      "start_line": 1,
+      "end_line": 1,
+      "id": "portal:types.ts:module:types.ts:1:0",
+      "name": "types.ts",
+      "kind": "module",
+      "evidence_id": "ev-bd630271c55bf10cb940a581"
+    }
+  ],
+  "evidence": [
+    {
+      "repository_id": "api",
+      "file": "ItemsController.cs",
+      "start_line": 1,
+      "end_line": 14,
+      "id": "ev-f3f615e20231e7ead5f3d577",
+      "revision": "9327291eb6bb8783c1101a64ea11a2137fad377f",
+      "source_hash": "6701014f9d8292f3744cc9c01454d8aac12072226ea49217cc6df9e8f8539705",
+      "symbol": "api:ItemsController.cs:module:ItemsController.cs:1:0"
+    },
+    {
+      "repository_id": "api",
+      "file": "ItemsController.cs",
+      "start_line": 5,
+      "end_line": 14,
+      "id": "ev-f524bc169639fa5fdcee6b96",
+      "revision": "9327291eb6bb8783c1101a64ea11a2137fad377f",
+      "source_hash": "6701014f9d8292f3744cc9c01454d8aac12072226ea49217cc6df9e8f8539705",
+      "symbol": "api:ItemsController.cs:class:ItemsController:5:0"
+    },
+    {
+      "repository_id": "api",
+      "file": "ItemsController.cs",
+      "start_line": 9,
+      "end_line": 13,
+      "id": "ev-a2e77a5e8646f8d1a6d8184f",
+      "revision": "9327291eb6bb8783c1101a64ea11a2137fad377f",
+      "source_hash": "6701014f9d8292f3744cc9c01454d8aac12072226ea49217cc6df9e8f8539705",
+      "symbol": "api:ItemsController.cs:method:ItemsController.List:9:4"
+    },
+    {
+      "repository_id": "portal",
+      "file": "client.ts",
+      "start_line": 1,
+      "end_line": 8,
+      "id": "ev-fe652ccaea4af435d2c74e92",
+      "revision": "e493ad4abbd553c659e9e7c93b9a8e810a6d2da3",
+      "source_hash": "af03d750d52cbcff0cbb47159b2331fd49ca851441ffb8a1afdc33797d16e0e1",
+      "symbol": "portal:client.ts:module:client.ts:1:0"
+    },
+    {
+      "repository_id": "portal",
+      "file": "client.ts",
+      "start_line": 3,
+      "end_line": 8,
+      "id": "ev-056d903b636e23d3b418d7fa",
+      "revision": "e493ad4abbd553c659e9e7c93b9a8e810a6d2da3",
+      "source_hash": "af03d750d52cbcff0cbb47159b2331fd49ca851441ffb8a1afdc33797d16e0e1",
+      "symbol": "portal:client.ts:function:loadItems:3:7"
+    },
+    {
+      "repository_id": "portal",
+      "file": "types.ts",
+      "start_line": 1,
+      "end_line": 1,
+      "id": "ev-bd630271c55bf10cb940a581",
+      "revision": "e493ad4abbd553c659e9e7c93b9a8e810a6d2da3",
+      "source_hash": "c1f21f50f2fad0c84e716907f0d856fa11c1a7f21ab2ef14a093ab541790d939",
+      "symbol": "portal:types.ts:module:types.ts:1:0"
+    }
+  ],
+  "dependencies": [
+    {
+      "from_symbol": "api:ItemsController.cs:module:ItemsController.cs:1:0",
+      "target": "using Microsoft.AspNetCore.Mvc;",
+      "kind": "using",
+      "evidence_id": "ev-f3f615e20231e7ead5f3d577"
+    },
+    {
+      "from_symbol": "portal:client.ts:module:client.ts:1:0",
+      "target": "./types",
+      "kind": "import",
+      "evidence_id": "ev-fe652ccaea4af435d2c74e92"
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "endpoint-13efc068a81883f274179906",
+      "symbol_id": "api:ItemsController.cs:method:ItemsController.List:9:4",
+      "repository_id": "api",
+      "method": "GET",
+      "route": "/api/Items",
+      "evidence_ids": [
+        "ev-f524bc169639fa5fdcee6b96",
+        "ev-a2e77a5e8646f8d1a6d8184f"
+      ]
+    }
+  ],
+  "calls": [
+    {
+      "id": "call-f3221e5c731ab524e3ea8ce8",
+      "symbol_id": "portal:client.ts:function:loadItems:3:7",
+      "repository_id": "portal",
+      "method": "GET",
+      "url": "https://api.example.invalid/api/items",
+      "evidence_id": "ev-056d903b636e23d3b418d7fa"
+    }
+  ],
+  "relations": [
+    {
+      "id": "rel-a14e0ad703af63185c4cc390",
+      "call_id": "call-f3221e5c731ab524e3ea8ce8",
+      "endpoint_id": "endpoint-13efc068a81883f274179906",
+      "status": "confirmed",
+      "reason": "destination_method_route"
+    }
+  ],
+  "coverage": {
+    "schema_version": "1.0",
+    "confirmed": [
+      "rel-a14e0ad703af63185c4cc390"
+    ],
+    "candidates": [],
+    "unresolved_calls": [],
+    "gaps": []
+  }
+}

@@ -56,9 +56,9 @@ def revision(repository: Repository) -> str:
     return commit
 
 
-def permitted(root: Path, relative: str, exclusions: GitIgnoreSpec) -> bool:
+def eligible_name(relative: str, exclusions: GitIgnoreSpec) -> bool:
     parts = PurePosixPath(relative).parts
-    if not parts or any(part in {"..", "."} for part in parts):
+    if not parts or PurePosixPath(relative).is_absolute() or any(part in {"..", "."} for part in parts):
         return False
     if any(part.lower() in EXCLUDED_DIRECTORIES for part in parts):
         return False
@@ -66,8 +66,14 @@ def permitted(root: Path, relative: str, exclusions: GitIgnoreSpec) -> bool:
         return False
     if exclusions.match_file(relative):
         return False
+    return True
+
+
+def permitted(root: Path, relative: str, exclusions: GitIgnoreSpec) -> bool:
+    if not eligible_name(relative, exclusions):
+        return False
     candidate = root
-    for part in parts:
+    for part in PurePosixPath(relative).parts:
         candidate = candidate / part
         if candidate.is_symlink() or candidate.is_junction():
             return False

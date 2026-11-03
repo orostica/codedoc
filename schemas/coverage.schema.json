@@ -1,0 +1,85 @@
+{
+  "$defs": {
+    "Gap": {
+      "additionalProperties": false,
+      "properties": {
+        "repository_id": {
+          "title": "Repository Id",
+          "type": "string"
+        },
+        "file": {
+          "title": "File",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        }
+      },
+      "required": [
+        "repository_id",
+        "file",
+        "code"
+      ],
+      "title": "Gap",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "confirmed": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Confirmed",
+      "type": "array"
+    },
+    "candidates": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Candidates",
+      "type": "array"
+    },
+    "unresolved_calls": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolved Calls",
+      "type": "array"
+    },
+    "gaps": {
+      "items": {
+        "$ref": "#/$defs/Gap"
+      },
+      "title": "Gaps",
+      "type": "array"
+    }
+  },
+  "required": [
+    "confirmed",
+    "candidates",
+    "unresolved_calls",
+    "gaps"
+  ],
+  "title": "Coverage",
+  "type": "object"
+}

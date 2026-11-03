@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "analysis_id": "192a45029b0d0d3029d302e3f2bb7c1db5e57931401a80124a83627f89c5047d",
+  "reviewed": false,
+  "modules": [
+    {
+      "id": "get-api-items-5c4cc390",
+      "title": "GET /api/Items",
+      "relation_ids": [
+        "rel-a14e0ad703af63185c4cc390"
+      ]
+    }
+  ]
+}

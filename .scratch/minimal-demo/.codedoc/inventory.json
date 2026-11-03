@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "repositories": [
+    {
+      "id": "api",
+      "revision": "9327291eb6bb8783c1101a64ea11a2137fad377f",
+      "files": [
+        "Demo.csproj",
+        "ItemsController.cs"
+      ],
+      "languages": [
+        "csharp"
+      ],
+      "projects": [
+        {
+          "manifest": "Demo.csproj",
+          "technologies": [
+            "csharp",
+            "dotnet"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "portal",
+      "revision": "e493ad4abbd553c659e9e7c93b9a8e810a6d2da3",
+      "files": [
+        "client.ts",
+        "package.json",
+        "types.ts"
+      ],
+      "languages": [
+        "typescript"
+      ],
+      "projects": [
+        {
+          "manifest": "package.json",
+          "technologies": [
+            "next",
+            "nodejs"
+          ]
+        }
+      ]
+    }
+  ],
+  "destinations": [
+    {
+      "url": "https://api.example.invalid",
+      "repository_id": "api"
+    }
+  ]
+}

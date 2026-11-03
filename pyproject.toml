@@ -7,7 +7,11 @@ name = "codedoc-engine"
 version = "0.1.0"
 description = "Inventário local de ecossistemas de software"
 requires-python = ">=3.12"
-dependencies = ["typer>=0.12,<1", "pydantic>=2,<3", "PyYAML>=6,<7", "pathspec>=0.12,<1"]
+dependencies = [
+    "typer>=0.12,<1", "pydantic>=2,<3", "PyYAML>=6,<7", "pathspec>=0.12,<1",
+    "tree-sitter>=0.25,<0.26", "tree-sitter-typescript>=0.23,<0.24",
+    "tree-sitter-c-sharp>=0.23,<0.24",
+]
 
 [project.optional-dependencies]
 test = ["pytest>=8,<10"]
