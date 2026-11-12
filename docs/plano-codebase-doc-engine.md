@@ -392,7 +392,7 @@ Meta: `tokens_hibrido <= 0,80 × tokens_baseline`, sem aumento de omissões rele
 
 ## 15. Sistema e funcionalidade piloto
 
-O diretório informado pelo desenvolvedor é `C:\SETDIG\MSSUPERA`. A inspeção inicial encontrou três projetos:
+O diretório do ecossistema piloto é `MSSUPERA/`, relativo à pasta que reúne os projetos. A inspeção inicial encontrou três projetos:
 
 | Papel | Diretório | Evidência inicial |
 |---|---|---|

@@ -10,14 +10,16 @@ e `validate`. A CLI não invoca agentes nem executa os projetos analisados.
 
 Após instalar a ferramenta uma vez conforme a etapa 1, abra o PowerShell na
 pasta que reúne os repositórios. O script usa o ambiente virtual da instalação
-do CodeDoc, sem precisar ativá-lo ou configurar variáveis:
+do CodeDoc, sem precisar ativá-lo. Configure as variáveis abaixo com os caminhos desejados:
 
 ```powershell
-cd C:\MeuEcossistema
-& C:\SETDIG\codedoc\codedoc.cmd init
+$CodeDocRoot = (Resolve-Path "CAMINHO_DA_INSTALACAO_CODEDOC").Path
+$EcosystemRoot = (Resolve-Path "CAMINHO_DOS_REPOSITORIOS").Path
+Set-Location $EcosystemRoot
+& "$CodeDocRoot\codedoc.cmd" init
 ```
 
-Substitua `C:\SETDIG\codedoc` pelo local da sua instalação. O comando `init`
+Os marcadores indicam o local da instalação e a pasta dos repositórios. O comando `init`
 cria `ecosystem.yaml` com os repositórios Git encontrados nas subpastas
 imediatas, em ordem de nome, com IDs `repo-1`, `repo-2` etc. Pastas comuns e
 links de diretórios não são incluídos. A busca não é recursiva.
@@ -28,13 +30,13 @@ Revise o YAML gerado, acrescente exclusões necessárias e preencha
 no exemplo da etapa 2. URLs não são inferidas automaticamente. Em seguida:
 
 ```powershell
-& C:\SETDIG\codedoc\codedoc.cmd scan
-& C:\SETDIG\codedoc\codedoc.cmd analyze
-& C:\SETDIG\codedoc\codedoc.cmd plan
+& "$CodeDocRoot\codedoc.cmd" scan
+& "$CodeDocRoot\codedoc.cmd" analyze
+& "$CodeDocRoot\codedoc.cmd" plan
 # Revise .codedoc\plan.json e marque reviewed como true.
-& C:\SETDIG\codedoc\codedoc.cmd context --module ID_DO_MODULO
+& "$CodeDocRoot\codedoc.cmd" context --module ID_DO_MODULO
 # Produza module.md com o pacote exportado e o agente escolhido.
-& C:\SETDIG\codedoc\codedoc.cmd validate .\module.md --context .\.codedoc\contexts\ID_DO_MODULO
+& "$CodeDocRoot\codedoc.cmd" validate .\module.md --context .\.codedoc\contexts\ID_DO_MODULO
 ```
 
 Todos os comandos procuram `ecosystem.yaml` no diretório atual quando
@@ -52,7 +54,7 @@ O fluxo completo é: instalar → configurar → inventariar → analisar → re
 o plano → exportar o contexto → produzir o Markdown → validar e revisar.
 
 Execute os comandos no PowerShell, na raiz deste projeto. Substitua
-`C:\MeuEcossistema` pela pasta que contém os repositórios a documentar.
+`$EcosystemRoot` pela pasta que contém os repositórios a documentar.
 A instalação da ferramenta fica separada dos repositórios analisados.
 
 ### 1. Instalar a ferramenta
@@ -71,12 +73,12 @@ O extra `[test]` instala também as dependências de testes.
 
 ### 2. Preparar os repositórios e a configuração
 
-Neste exemplo, coloque o backend em `C:\MeuEcossistema\backend` e o frontend
-em `C:\MeuEcossistema\frontend`. Confira cada repositório com
-`git -C C:\MeuEcossistema\backend status --short` e repita para o frontend.
+Neste exemplo, coloque o backend em `$EcosystemRoot\backend` e o frontend
+em `$EcosystemRoot\frontend`. Confira cada repositório com
+`git -C "$EcosystemRoot\backend" status --short` e repita para o frontend.
 A saída deve estar vazia e cada repositório deve ter pelo menos um commit.
 
-Crie `C:\MeuEcossistema\ecosystem.yaml`, fora dos repositórios analisados:
+Crie `$EcosystemRoot\ecosystem.yaml`, fora dos repositórios analisados:
 
 ```yaml
 repositories:
@@ -125,10 +127,10 @@ trechos de código ou valores dos manifests, apenas os metadados descritos.
 ### 3. Conferir o inventário
 
 ```powershell
-.\.venv\Scripts\codedoc.exe scan --config C:\MeuEcossistema\ecosystem.yaml
+.\.venv\Scripts\codedoc.exe scan --config "$EcosystemRoot\ecosystem.yaml"
 ```
 
-Abra `C:\MeuEcossistema\.codedoc\inventory.json` e confira os repositórios,
+Abra `$EcosystemRoot\.codedoc\inventory.json` e confira os repositórios,
 commits, arquivos, projetos e avisos antes de continuar.
 
 ### 4. Analisar e gerar o plano
@@ -139,8 +141,8 @@ de relações confirmadas, achados e lacunas. Confira esses resultados em
 `analysis.json`. Lacunas indicam partes que a ferramenta não conseguiu resolver.
 
 ```powershell
-.\.venv\Scripts\codedoc.exe analyze --config C:\MeuEcossistema\ecosystem.yaml
-.\.venv\Scripts\codedoc.exe plan --config C:\MeuEcossistema\ecosystem.yaml
+.\.venv\Scripts\codedoc.exe analyze --config "$EcosystemRoot\ecosystem.yaml"
+.\.venv\Scripts\codedoc.exe plan --config "$EcosystemRoot\ecosystem.yaml"
 ```
 
 Os artefatos ficam ao lado do inventário configurado: `analysis.json` contém
@@ -149,7 +151,7 @@ comparações, achados e cobertura. `plan.json` sugere um módulo por relação 
 nomes, o escopo e as relações e altere `reviewed` de `false` para `true`.
 ### 5. Revisar o plano e escolher um módulo
 
-Abra `C:\MeuEcossistema\.codedoc\plan.json` em um editor. Confira os módulos
+Abra `$EcosystemRoot\.codedoc\plan.json` em um editor. Confira os módulos
 e as relações sugeridas com base em `analysis.json`, preservando os IDs e
 as referências aos artefatos. O campo `reviewed` pertence ao plano: marque-o
 como `true` somente depois de revisar e salve o arquivo.
@@ -162,7 +164,7 @@ Copie o `id` de um módulo da lista `modules`. Se ela estiver vazia, confira
 Substitua `ID_DO_MODULO` pelo identificador copiado do plano:
 
 ```powershell
-.\.venv\Scripts\codedoc.exe context --config C:\MeuEcossistema\ecosystem.yaml --module ID_DO_MODULO
+.\.venv\Scripts\codedoc.exe context --config "$EcosystemRoot\ecosystem.yaml" --module ID_DO_MODULO
 ```
 
 A exportação exige plano revisado da análise atual, configuração compatível,
@@ -188,7 +190,7 @@ exigidas, usando as evidências de context.json. Registre os achados e
 as lacunas e use os IDs exatos nas citações.
 ```
 
-Salve o documento em `C:\MeuEcossistema\module.md`, fora dos repositórios
+Salve o documento em `$EcosystemRoot\module.md`, fora dos repositórios
 analisados. Use citações `[@ev-<24 caracteres hexadecimais>]`, copiando os IDs
 exatos de `context.json`. Cada evidência identifica repositório, commit,
 arquivo relativo, símbolo, linhas inclusivas e SHA-256 do arquivo inteiro.
@@ -198,7 +200,7 @@ verificados contra os blobs Git, independentemente de CRLF da cópia local.
 ### 8. Validar e revisar o documento
 
 ```powershell
-.\.venv\Scripts\codedoc.exe validate C:\MeuEcossistema\module.md --config C:\MeuEcossistema\ecosystem.yaml --context C:\MeuEcossistema\.codedoc\contexts\ID_DO_MODULO
+.\.venv\Scripts\codedoc.exe validate "$EcosystemRoot\module.md" --config "$EcosystemRoot\ecosystem.yaml" --context "$EcosystemRoot\.codedoc\contexts\ID_DO_MODULO"
 ```
 
 O validador exige seções Objetivo, Fluxo, Evidências, Lacunas e Revisão,
