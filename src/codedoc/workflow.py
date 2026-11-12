@@ -12,6 +12,7 @@ from pydantic import ValidationError
 
 from codedoc.config import Configuration, ScanError
 from codedoc.comparison import compare_required_fields
+from codedoc.type_comparison import compare_types
 from codedoc.models import Analysis, Context, Coverage, Gap, Module, Plan, Relation, Source
 from codedoc.parsing import Extractor, stable_id
 from codedoc.scanner import git, revision, scan, write_inventory
@@ -132,11 +133,14 @@ def analyze(config: Configuration) -> Analysis:
                             code="destination_unmapped" if not destinations else "endpoint_unresolved_or_ambiguous", call_id=call.id))
     comparisons, findings, comparison_gaps = compare_required_fields(calls, endpoints, relations, symbols, gaps)
     gaps.extend(comparison_gaps)
+    type_comparisons, type_findings, type_gaps = compare_types(calls, endpoints, relations, symbols, gaps)
+    findings.extend(type_findings)
+    gaps.extend(type_gaps)
     analysis = Analysis(analysis_id="pending", config_hash=config_hash(config),
                         repositories=[{"id": repo["id"], "revision": repo["revision"]} for repo in inventory["repositories"]],
                         symbols=symbols, evidence=evidence, dependencies=dependencies,
                         calls=calls, endpoints=endpoints, relations=relations,
-                        comparisons=comparisons, findings=findings,
+                        comparisons=comparisons, findings=findings, type_comparisons=type_comparisons,
                         coverage=coverage(calls, relations, gaps))
     analysis.analysis_id = analysis_hash(analysis)
     check_revisions(config, analysis)
@@ -197,6 +201,7 @@ def select_analysis(analysis: Analysis, module: Module) -> Analysis:
                     dependencies=dependencies, calls=calls, endpoints=endpoints, relations=relations,
                     comparisons=[item for item in analysis.comparisons if item.relation_id in relation_ids],
                     findings=[item for item in analysis.findings if item.relation_id in relation_ids],
+                    type_comparisons=[item for item in analysis.type_comparisons if item.relation_id in relation_ids],
                     coverage=coverage(calls, relations, analysis.coverage.gaps))
 
 
@@ -213,8 +218,10 @@ substituindo pelo ID exato da evidência. Cada parágrafo de Objetivo e Fluxo
 deve conter uma citação. Diferencie fatos de inferências e preserve lacunas.
 Imports são dependências sintáticas, sem garantia de resolução semântica.
 Descreva apenas divergências registradas em analysis.findings, preservando seus IDs,
-explicações e citações de ambos os lados. O recorte compara presença de chaves JSON,
-sem validar tipos ou valores; no_omission não comprova compatibilidade completa.
+explicações e citações de ambos os lados. Consulte também analysis.type_comparisons:
+tipos observados em corpos, parâmetros e acessos à resposta, com resultado e limites.
+Uma comparação compatible vale somente para a operação e o caminho registrados;
+no_omission não comprova compatibilidade completa. Declarações não substituem operações.
 Comparações unknown e relações candidatas são lacunas, sem divergência afirmada.
 Restrição de interface não comprova regra aplicada no servidor.
 Registre revisão humana pendente; referências válidas não aprovam o conteúdo.

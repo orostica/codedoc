@@ -1,4 +1,4 @@
-"""Contratos executáveis: análise/contexto 1.1, plano/cobertura 1.0."""
+"""Contratos executáveis: análise/contexto 1.2, plano/cobertura 1.0."""
 
 from pathlib import PurePosixPath
 from typing import Literal
@@ -82,6 +82,32 @@ class BodyRequirement(Model):
         return self
 
 
+class TypeFact(Model):
+    """Tipo observado na implementação, com caminho JSON ou nome de parâmetro."""
+
+    location: Literal["body", "query", "response"]
+    path: str
+    kind: Literal["string", "boolean", "null", "object", "array", "int32", "integer", "number", "absent", "unknown", "integer_text", "invalid_integer_text"]
+
+
+class TypeContract(Model):
+    facts: list[TypeFact] = Field(default_factory=list)
+    unresolved: list[str] = Field(default_factory=list)
+
+
+class TypeComparison(Model):
+    relation_id: str
+    location: Literal["body", "query", "response"]
+    path: str
+    actual: str
+    expected: str
+    status: Literal["compatible", "incompatible", "unknown"]
+    reason: str
+    evidence_ids: list[str] = Field(min_length=2, max_length=2)
+    finding_id: str | None = None
+    explanation: str
+
+
 class Endpoint(Model):
     id: str
     symbol_id: str
@@ -90,6 +116,7 @@ class Endpoint(Model):
     route: str
     evidence_ids: list[str]
     request: BodyRequirement
+    types: TypeContract = Field(default_factory=TypeContract)
 
 
 class Call(Model):
@@ -100,6 +127,7 @@ class Call(Model):
     url: str | None
     evidence_id: str
     body: RequestBody
+    types: TypeContract = Field(default_factory=TypeContract)
 
 
 class Relation(Model):
@@ -119,7 +147,7 @@ class Gap(Model):
 
 class Finding(Model):
     id: str = Field(pattern=r"^finding-[a-f0-9]{24}$")
-    code: Literal["missing_required_field"] = "missing_required_field"
+    code: Literal["missing_required_field", "incompatible_type"] = "missing_required_field"
     relation_id: str
     field: str
     explanation: str
@@ -142,7 +170,7 @@ class Coverage(Model):
 
 
 class Analysis(Model):
-    schema_version: Literal["1.1"] = "1.1"
+    schema_version: Literal["1.2"] = "1.2"
     analysis_id: str
     config_hash: str
     repositories: list[RepositoryRevision]
@@ -154,6 +182,7 @@ class Analysis(Model):
     relations: list[Relation]
     findings: list[Finding]
     comparisons: list[Comparison]
+    type_comparisons: list[TypeComparison] = Field(default_factory=list)
     coverage: Coverage
 
     @model_validator(mode="after")
@@ -195,6 +224,8 @@ class Analysis(Model):
             if rel is None or rel.status != "confirmed":
                 raise ValueError("Achado exige relação confirmada")
             call, endpoint = calls[rel.call_id], endpoints[rel.endpoint_id]
+            if item.code == "incompatible_type":
+                continue
             if (call.body.status != "object" or endpoint.request.status != "known"
                     or item.field not in endpoint.request.fields or item.field in call.body.fields
                     or set(item.evidence_ids) != {call.evidence_id, symbols[endpoint.symbol_id].evidence_id}):
@@ -202,7 +233,7 @@ class Analysis(Model):
         if {item.relation_id for item in self.comparisons} != set(relations) or len(self.comparisons) != len(relations):
             raise ValueError("Comparações incompletas ou duplicadas")
         for item in self.comparisons:
-            linked = [finding for finding in self.findings if finding.relation_id == item.relation_id]
+            linked = [finding for finding in self.findings if finding.relation_id == item.relation_id and finding.code == "missing_required_field"]
             if set(item.finding_ids) != {finding.id for finding in linked} or len(set(item.finding_ids)) != len(item.finding_ids):
                 raise ValueError("Comparação referencia achados inconsistentes")
             rel = relations[item.relation_id]
@@ -220,6 +251,12 @@ class Analysis(Model):
                         "missing" if missing else "no_omission")
             if item.status != expected or {finding.field for finding in linked} != (missing if expected == "missing" else set()):
                 raise ValueError("Resultado de comparação inconsistente")
+        from codedoc.type_comparison import compare_types
+        expected_types, expected_findings, _ = compare_types(self.calls, self.endpoints, self.relations,
+                                                            self.symbols, self.coverage.gaps)
+        if (self.type_comparisons != expected_types or
+                [item for item in self.findings if item.code == "incompatible_type"] != expected_findings):
+            raise ValueError("Comparação de tipos ou achados inconsistentes")
         confirmed = [item.id for item in self.relations if item.status == "confirmed"]
         candidates = [item.id for item in self.relations if item.status == "candidate"]
         unresolved = [item.id for item in self.calls if not any(rel.call_id == item.id and rel.status == "confirmed" for rel in self.relations)]
@@ -249,7 +286,7 @@ class Source(Model):
 
 
 class Context(Model):
-    schema_version: Literal["1.1"] = "1.1"
+    schema_version: Literal["1.2"] = "1.2"
     module: Module
     analysis: Analysis
     sources: list[Source]

@@ -1,0 +1,165 @@
+[
+  {
+    "id": "body-string",
+    "location": "body",
+    "value": "\"Ana\"",
+    "operation": "GetString",
+    "expected": "compatible"
+  },
+  {
+    "id": "body-number-as-string",
+    "location": "body",
+    "value": "18",
+    "operation": "GetString",
+    "expected": "incompatible"
+  },
+  {
+    "id": "body-null-string",
+    "location": "body",
+    "value": "null",
+    "operation": "GetString",
+    "expected": "compatible"
+  },
+  {
+    "id": "body-int32",
+    "location": "body",
+    "value": "18",
+    "operation": "GetInt32",
+    "expected": "compatible"
+  },
+  {
+    "id": "body-string-as-int",
+    "location": "body",
+    "value": "\"18\"",
+    "operation": "GetInt32",
+    "expected": "incompatible"
+  },
+  {
+    "id": "body-fraction",
+    "location": "body",
+    "value": "1.5",
+    "operation": "GetInt32",
+    "expected": "incompatible"
+  },
+  {
+    "id": "body-overflow",
+    "location": "body",
+    "value": "2147483648",
+    "operation": "GetInt32",
+    "expected": "incompatible"
+  },
+  {
+    "id": "body-bool",
+    "location": "body",
+    "value": "true",
+    "operation": "GetBoolean",
+    "expected": "compatible"
+  },
+  {
+    "id": "body-null-bool",
+    "location": "body",
+    "value": "null",
+    "operation": "GetBoolean",
+    "expected": "incompatible"
+  },
+  {
+    "id": "body-int-double",
+    "location": "body",
+    "value": "18",
+    "operation": "GetDouble",
+    "expected": "compatible"
+  },
+  {
+    "id": "body-dynamic",
+    "location": "body",
+    "value": "dynamicValue",
+    "operation": "GetString",
+    "expected": "unknown"
+  },
+  {
+    "id": "response-string",
+    "location": "response",
+    "value": "\"Ana\"",
+    "operation": "toUpperCase",
+    "expected": "compatible"
+  },
+  {
+    "id": "response-number",
+    "location": "response",
+    "value": "18",
+    "operation": "toUpperCase",
+    "expected": "incompatible"
+  },
+  {
+    "id": "response-number-fixed",
+    "location": "response",
+    "value": "18",
+    "operation": "toFixed",
+    "expected": "compatible"
+  },
+  {
+    "id": "response-null",
+    "location": "response",
+    "value": "null",
+    "operation": "trim",
+    "expected": "incompatible"
+  },
+  {
+    "id": "response-object",
+    "location": "response",
+    "value": "{}",
+    "operation": "trim",
+    "expected": "incompatible"
+  },
+  {
+    "id": "response-array",
+    "location": "response",
+    "value": "[]",
+    "operation": "trim",
+    "expected": "incompatible"
+  },
+  {
+    "id": "response-unknown",
+    "location": "response",
+    "value": "dynamic",
+    "operation": "trim",
+    "expected": "unknown"
+  },
+  {
+    "id": "response-missing",
+    "location": "response",
+    "value": "missing",
+    "operation": "trim",
+    "expected": "incompatible"
+  },
+  {
+    "id": "query-int",
+    "location": "query",
+    "value": "18",
+    "expected": "compatible"
+  },
+  {
+    "id": "query-text",
+    "location": "query",
+    "value": "abc",
+    "expected": "incompatible"
+  },
+  {
+    "id": "query-fraction",
+    "location": "query",
+    "value": "1.5",
+    "expected": "incompatible"
+  },
+  {
+    "id": "query-overflow",
+    "location": "query",
+    "value": "2147483648",
+    "expected": "incompatible"
+  },
+  {
+    "id": "query-duplicate",
+    "location": "query",
+    "value": "18&age=20",
+    "expected": "unknown"
+  }
+]

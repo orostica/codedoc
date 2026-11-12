@@ -10,6 +10,7 @@ import tree_sitter_typescript
 
 from codedoc.models import Call, Dependency, Endpoint, Evidence, Gap, Symbol
 from codedoc.contracts import body_requirement, request_body, serialization_risk
+from codedoc.type_contracts import backend_types, frontend_types
 from codedoc.syntax import attributes, literal, property_name, stable_id, text, walk
 
 
@@ -120,7 +121,7 @@ class Extractor:
                     url = None
             call = Call(id=stable_id("call-", symbol.id, str(node.start_byte)), symbol_id=symbol.id,
                         repository_id=self.repository_id, method=method, url=url, evidence_id=symbol.evidence_id,
-                        body=request_body(node, root))
+                        body=request_body(node, root), types=frontend_types(node, root))
             self.calls.append(call)
             if url is None or method is None:
                 self.gap("fetch_unresolved", call.id)
@@ -180,6 +181,7 @@ class Extractor:
                 self.endpoints.append(Endpoint(id=stable_id("endpoint-", symbol.id, verb, route), symbol_id=symbol.id,
                                                repository_id=self.repository_id, method=verb, route=route,
                                                evidence_ids=[class_symbol.evidence_id, symbol.evidence_id],
-                                               request=body_requirement(method, node, root)))
+                                               request=body_requirement(method, node, root),
+                                               types=backend_types(method, node, root)))
         if any(node.type == "invocation_expression" and re.search(r"\.Map(Get|Post|Put|Delete|Patch)$", text(node.child_by_field_name("function"))) for node in walk(root)):
             self.gap("minimal_api_not_supported")

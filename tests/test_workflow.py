@@ -81,7 +81,7 @@ def test_cli_full_workflow_and_unknown_citation(ecosystem, tmp_path, monkeypatch
     assert len(analysis.relations) == 1
     assert analysis.relations[0].status == "confirmed"
     assert analysis.coverage.unresolved_calls == []
-    assert analysis.coverage.gaps == []
+    assert {gap.code for gap in analysis.coverage.gaps} == {"response_type_unresolved"}
     assert {item.kind for item in analysis.dependencies} == {"import", "using"}
     assert all(item.id.startswith(item.repository_id + ":") for item in analysis.symbols)
     plan = read_model(config.output.parent / "plan.json", Plan)

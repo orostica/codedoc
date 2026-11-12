@@ -81,6 +81,9 @@
         },
         "body": {
           "$ref": "#/$defs/RequestBody"
+        },
+        "types": {
+          "$ref": "#/$defs/TypeContract"
         }
       },
       "required": [
@@ -244,6 +247,9 @@
         },
         "request": {
           "$ref": "#/$defs/BodyRequirement"
+        },
+        "types": {
+          "$ref": "#/$defs/TypeContract"
         }
       },
       "required": [
@@ -321,8 +327,11 @@
           "type": "string"
         },
         "code": {
-          "const": "missing_required_field",
           "default": "missing_required_field",
+          "enum": [
+            "missing_required_field",
+            "incompatible_type"
+          ],
           "title": "Code",
           "type": "string"
         },
@@ -545,13 +554,159 @@
       ],
       "title": "Symbol",
       "type": "object"
+    },
+    "TypeComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "relation_id": {
+          "title": "Relation Id",
+          "type": "string"
+        },
+        "location": {
+          "enum": [
+            "body",
+            "query",
+            "response"
+          ],
+          "title": "Location",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "actual": {
+          "title": "Actual",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "compatible",
+            "incompatible",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "finding_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Id"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "relation_id",
+        "location",
+        "path",
+        "actual",
+        "expected",
+        "status",
+        "reason",
+        "evidence_ids",
+        "explanation"
+      ],
+      "title": "TypeComparison",
+      "type": "object"
+    },
+    "TypeContract": {
+      "additionalProperties": false,
+      "properties": {
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/TypeFact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "unresolved": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved",
+          "type": "array"
+        }
+      },
+      "title": "TypeContract",
+      "type": "object"
+    },
+    "TypeFact": {
+      "additionalProperties": false,
+      "description": "Tipo observado na implementa\u00e7\u00e3o, com caminho JSON ou nome de par\u00e2metro.",
+      "properties": {
+        "location": {
+          "enum": [
+            "body",
+            "query",
+            "response"
+          ],
+          "title": "Location",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "string",
+            "boolean",
+            "null",
+            "object",
+            "array",
+            "int32",
+            "integer",
+            "number",
+            "absent",
+            "unknown",
+            "integer_text",
+            "invalid_integer_text"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "location",
+        "path",
+        "kind"
+      ],
+      "title": "TypeFact",
+      "type": "object"
     }
   },
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.1",
-      "default": "1.1",
+      "const": "1.2",
+      "default": "1.2",
       "title": "Schema Version",
       "type": "string"
     },
@@ -624,6 +779,13 @@
         "$ref": "#/$defs/Comparison"
       },
       "title": "Comparisons",
+      "type": "array"
+    },
+    "type_comparisons": {
+      "items": {
+        "$ref": "#/$defs/TypeComparison"
+      },
+      "title": "Type Comparisons",
       "type": "array"
     },
     "coverage": {

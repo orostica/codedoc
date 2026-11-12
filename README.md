@@ -252,8 +252,7 @@ destino configurado, método e rota compatíveis e um único endpoint candidato.
 
 URLs relativas ou dinâmicas, fetch sombreado, opções dinâmicas, spreads,
 rotas parametrizadas, Controllers com base não resolvida, Axios e Minimal
-APIs detectados são registrados como lacunas. Proxies Next.js, comparação
-de tipos e resolução semântica ficam para os próximos
+APIs detectados são registrados como lacunas. Proxies Next.js e resolução semântica ficam para os próximos
 tickets. As dependências import/using são sintáticas. Não há comprovação
 do comportamento em execução nem de configuração global do servidor.
 
@@ -266,8 +265,8 @@ cobertura completa. A análise lê código elegível e exporta trechos: adicione
 
 Os schemas JSON versionados estão em `schemas/`, gerados dos modelos
 Pydantic usados para validar artefatos em execução. Análise e contexto usam
-a versão 1.1; plano e cobertura permanecem em 1.0. Artefatos de análise e
-contexto 1.0 precisam ser regenerados: preserve os anteriores, execute analyze
+a versão 1.2; plano e cobertura permanecem em 1.0. Artefatos de análise e
+contexto 1.0/1.1 precisam ser regenerados: preserve os anteriores, execute analyze
 e gere/revise um novo plano antes de exportar novamente.
 O identificador da análise
 é o hash de seu conteúdo completo; no pacote ele preserva a referência à
@@ -353,3 +352,51 @@ O documento de exemplo inclui marcadores para ID do achado, evidências e
 commits. A matriz de resultados esperados foi fixada antes do detector em
 `tests/fixtures/required-field/cases.json`; a integração valida o documento
 e rejeita a omissão do achado ou de uma das citações exigidas.
+
+## Tipos de entrada e formatos de resposta
+
+`analysis.type_comparisons` compara tipos observados na implementação em
+relações confirmadas. Cada comparação registra local (`body`, `query` ou
+`response`), caminho, tipo fornecido, tipo exigido pela operação, resultado,
+explicação e evidências dos dois lados. Caminhos JSON usam `$` como raiz e
+segmentos escapados como JSON Pointer: `$/value`, `$/person/name`.
+Valores dos campos e parâmetros não são copiados para os fatos de tipo.
+
+O recorte inicial cobre:
+
+- Corpos JSON já resolvidos pelo extrator de presença de chaves, comparados
+  com `body.GetProperty("value").GetString()/GetBoolean()/GetInt32()/GetDouble()`
+  em um retorno único de ação com `[FromBody] JsonElement`. Para GetString,
+  JSON null é aceito; GetInt32 distingue frações e inteiros fora de Int32.
+  JSON.stringify normaliza números finitos dentro do intervalo seguro de JS.
+- Parâmetros de URL literal com `[FromQuery] string age`, quando o retorno
+  executa diretamente `int.Parse(age)`. Texto numérico no intervalo Int32
+  é comparado como `integer_text`; valores repetidos ficam indeterminados.
+  Binding de DTOs, nomes customizados e outras conversões geram lacunas.
+- Respostas escritas por `Content("JSON literal", "application/json")`
+  ou `base.Content`, com um único retorno. O frontend precisa usar três
+  instruções: `const response = await fetch(...)`,
+  `const data = await response.json()` e `return data.value.trim()`
+  (também toUpperCase, toLowerCase ou toFixed, sem argumentos). O acesso
+  pode consumir a raiz ou propriedades aninhadas. Outros fluxos e operações
+  permanecem indeterminados.
+
+`compatible` significa que os tipos coincidem para aquela operação;
+`incompatible` gera `analysis.findings` com código `incompatible_type`;
+`unknown` gera lacuna e nunca afirma divergência. Compatibilidade de uma
+operação não aprova o fluxo inteiro, regras de negócio ou execução em produção.
+Cada achado acompanha o módulo exportado e deve aparecer no documento com
+seu ID e as duas citações no mesmo parágrafo. O validador reextrai os fatos
+na revisão Git original e refaz a comparação, incluindo sua explicação.
+
+Anotações TypeScript, casts, tipos de retorno C# e ProducesResponseType não
+substituem o corpo construído ou retornado pela implementação. Continuam
+disponíveis nos trechos exportados como evidência adicional. DTOs, respostas
+Ok com objetos, convenções de serialização e negociação de conteúdo não
+resolvidas, aliases, condicionais, mutações e acesso opcional são lacunas.
+Sinais conhecidos de serialização customizada no repositório bloqueiam
+conclusões. A análise é sintática e não resolve filtros ou bibliotecas externas.
+
+A matriz em `tests/fixtures/types/cases.json` cobre entradas, parâmetros e
+respostas compatíveis, incompatíveis e indeterminados. O documento de exemplo
+em `tests/fixtures/types/document.md` é preenchido e validado pela integração.

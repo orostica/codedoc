@@ -8,6 +8,7 @@ from pathspec import GitIgnoreSpec
 
 from codedoc.config import Configuration, ScanError
 from codedoc.comparison import compare_required_fields
+from codedoc.type_comparison import compare_types
 from codedoc.models import Context, Coverage
 from codedoc.parsing import Extractor
 from codedoc.scanner import eligible_name, git
@@ -108,7 +109,11 @@ def validate_document(config: Configuration, document: Path, package: Path) -> l
     comparisons, findings, _ = compare_required_fields(context.analysis.calls, context.analysis.endpoints,
                                                       context.analysis.relations, context.analysis.symbols,
                                                       context.analysis.coverage.gaps)
-    if comparisons != context.analysis.comparisons or findings != context.analysis.findings:
+    type_comparisons, type_findings, _ = compare_types(context.analysis.calls, context.analysis.endpoints,
+                                                    context.analysis.relations, context.analysis.symbols,
+                                                    context.analysis.coverage.gaps)
+    if (comparisons != context.analysis.comparisons or findings + type_findings != context.analysis.findings
+            or type_comparisons != context.analysis.type_comparisons):
         errors.append("Achados ou comparações divergem das verificações determinísticas.")
     for source in context.sources:
         path = package / source.path
